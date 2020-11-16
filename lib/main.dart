@@ -88,13 +88,28 @@ class MyApp extends StatelessWidget {
     Widget build(BuildContext context) {
         return MaterialApp(
             title: 'Time Manager',
-            home: Scaffold(
-                appBar: AppBar(
-                    title: Text('Time Manager'),
-                ),
-                body: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Tasks(),
+            home: DefaultTabController(
+                length: 2,
+                child: Scaffold(
+                    appBar: AppBar(
+                        title: Text('Time Manager'),
+                        bottom: TabBar(
+                            tabs: [
+                                Tab(icon: Icon(Icons.edit)),
+                                Tab(icon: Icon(Icons.access_time)),
+                            ],
+                        ),
+                    ),
+
+                    body: TabBarView(
+                        children: [
+                            Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                                child: Tasks(),
+                            ),
+                            Text('fuck'),
+                        ],
+                    ),
                 ),
             ),
         );
