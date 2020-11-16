@@ -42,7 +42,7 @@ class DatabaseHelper {
         );
     }
 
-    Future<Task> createTask(name) async {
+    Future<Task> createTask(String name) async {
         var db_ = await db;
 
         final int id = await db_.insert(
@@ -64,6 +64,12 @@ class DatabaseHelper {
         return List.generate(maps.length, (i) {
             return Task(id: maps[i]['rowid'], name: maps[i]['name']);
         });
+    }
+
+    Future<void> removeTask(int id) async {
+        final Database db_ = await db;
+
+        db_.delete('Tasks', where: 'rowid = ?', whereArgs: [id]);
     }
 }
 
@@ -88,10 +94,10 @@ class _TaskEditorState extends State<TaskEditor> {
         });
     }
 
-    void _removeTaskAt(index) {
-        //setState(() {
-            //_tasks.removeAt(index);
-        //});
+    void _removeTask(id) {
+        setState(() {
+            db.removeTask(id);
+        });
     }
 
     @override
@@ -130,30 +136,41 @@ class _TaskEditorState extends State<TaskEditor> {
                 Expanded(
                     child: FutureBuilder<List<Task>>(
                         future: db.listTasks(),
-                        builder: (BuildContext context, AsyncSnapshot<List<Task>> tasks) {
-                            if (tasks.hasData) {
-                                return ListView.builder(
-                                    itemCount: tasks.data.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                        return Container(
-                                            height: 50,
-                                            child: Row(
-                                                children: [
-                                                    Text('${tasks.data[index].id}'),
-                                                    Expanded(child: Text('${tasks.data[index].name}')),
-                                                    ElevatedButton(
-                                                        onPressed: () {
-                                                            _removeTaskAt(index);
-                                                        },
-                                                        child: Text('Remove'),
-                                                    ),
-                                                ],
-                                            ),
-                                        );
-                                    },
-                                );
+                        builder: (BuildContext context, AsyncSnapshot<List<Task>> taskList) {
+                            print(taskList);
+                            if (taskList.connectionState == ConnectionState.done) {
+                                if (taskList.data.isEmpty) {
+                                    return Align(
+                                        alignment: Alignment.topCenter,
+                                        child: Text('No tasks'),
+                                    );
+                                } else {
+                                    return ListView.builder(
+                                        itemCount: taskList.data.length,
+                                        itemBuilder: (BuildContext context, int index) {
+                                            return Container(
+                                                height: 50,
+                                                child: Row(
+                                                    children: [
+                                                        Expanded(child: Text('${taskList.data[index].name}')),
+                                                        ElevatedButton(
+                                                            onPressed: () {
+                                                                _removeTask(taskList.data[index].id);
+                                                            },
+                                                            child: Text('Remove'),
+                                                        ),
+                                                    ],
+                                                ),
+                                            );
+                                        },
+                                    );
+                                }
                             } else {
-                                return Text('...');
+                                print('no data');
+                                return Align(
+                                    alignment: Alignment.topCenter,
+                                    child: CircularProgressIndicator(),
+                                );
                             }
                         },
                     ),
