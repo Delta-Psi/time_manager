@@ -9,6 +9,14 @@ class DailyTask {
     bool active;
 
     DailyTask({this.id, this.name, this.active});
+
+    static fromMap(map) {
+        return DailyTask(
+            id: map['rowid'],
+            name: map['name'],
+            active: map['active'] == 1,
+        );
+    }
 }
 
 class DatabaseHelper {
@@ -67,13 +75,24 @@ class DatabaseHelper {
         );
 
         return List.generate(maps.length, (i) {
-            return DailyTask(
-                id: maps[i]['rowid'],
-                name: maps[i]['name'],
-                active: maps[i]['active'] == 1,
-            );
+            return DailyTask.fromMap(maps[i]);
         });
     }
+    Future<List<DailyTask>> listActiveDailyTasks() async {
+        final db = await _getDb();
+
+        final List<Map<String, dynamic>> maps = await db.query(
+            'DailyTasks',
+            columns: ['rowid', 'name', 'active'],
+            where: 'active = 1',
+        );
+
+
+        return List.generate(maps.length, (i) {
+            return DailyTask.fromMap(maps[i]);
+        });
+    }
+
 
     Future<void> setDailyTaskActive(id, bool active) async {
         final db = await _getDb();

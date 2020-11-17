@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'database.dart';
+import 'notifications.dart';
 import 'daily_task_editor.dart';
+import 'daily_tasks.dart';
 
 void main() {
     runApp(MyApp());
@@ -38,10 +40,23 @@ class MyApp extends StatelessWidget {
                                         value: 1,
                                         child: Text('Reset database'),
                                     ),
+                                    PopupMenuItem(
+                                        value: 2,
+                                        child: Text('Send notification'),
+                                    ),
                                 ],
-                                onSelected: (_) {
-                                    db.resetDb();
-                                    _dbResetNotifier.value += 1;
+                                onSelected: (v) async {
+                                    if (v == 1) {
+                                        db.resetDb();
+                                        _dbResetNotifier.value += 1;
+                                    } else if (v == 2) {
+                                        var notif = await NotificationHelper.instance();
+                                        await notif.startTask('foo', Duration(hours: 1));
+                                        await Future.delayed(Duration(seconds: 5));
+                                        await notif.updateTask('foo', Duration(minutes: 30));
+                                        await Future.delayed(Duration(seconds: 5));
+                                        await notif.endTask('foo');
+                                    }
                                 },
                             ),
                         ],
@@ -56,7 +71,10 @@ class MyApp extends StatelessWidget {
                                     builder: (context, value, child) => DailyTaskEditor(),
                                 ),
                             ),
-                            Text('fuck'),
+                            ValueListenableBuilder<int>(
+                                valueListenable: _dbResetNotifier,
+                                builder: (context, value, child) => DailyTasks(),
+                            ),
                             Text('yeah'),
                         ],
                     ),

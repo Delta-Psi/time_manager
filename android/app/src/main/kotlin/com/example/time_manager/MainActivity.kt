@@ -1,4 +1,4 @@
-package com.example.time_manager
+package com.github.delta_psi.time_manager
 
 import io.flutter.embedding.android.FlutterActivity
 
