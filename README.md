@@ -1,6 +1,6 @@
 # time_manager
 
-Simple productivity app in Flutter.
+Simple Flutter productivity app for Android.
 
 ## Getting Started
 
