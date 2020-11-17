@@ -1,6 +1,6 @@
 # time_manager
 
-A new Flutter project.
+Simple productivity app in Flutter.
 
 ## Getting Started
 
