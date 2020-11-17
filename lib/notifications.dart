@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationHelper {
-    static NotificationHelper _singleton = null;
+    static NotificationHelper _singleton;
 
     static Future<NotificationHelper> instance() async {
         if (_singleton == null) {
@@ -21,13 +21,14 @@ class NotificationHelper {
     }
 
     String _format(Duration time) {
+        final minutes = time.inMinutes.toString().padLeft(2, '0');
         final seconds = (time.inSeconds % 60).toString().padLeft(2, '0');
-        return '${time.inMinutes}:${seconds}';
+        return '$minutes:$seconds';
     }
 
-    Future<void> startTask(String name, Duration time) async {
+    Future<void> showTask(String name, Duration time) async {
         await _plugin.show(
-            0, '${name}', '${_format(time)} remaining',
+            0, name, '${_format(time)} remaining',
             NotificationDetails(android: AndroidNotificationDetails(
                 'daily_task_progress', 'Daily Task Progress', '',
                 importance: Importance.defaultImportance,
@@ -39,24 +40,14 @@ class NotificationHelper {
         );
     }
 
-    Future<void> updateTask(String name, Duration time) async {
-        await _plugin.show(
-            0, '${name}', '${_format(time)} remaining',
-            NotificationDetails(android: AndroidNotificationDetails(
-                'daily_task_progress', 'Daily Tasks Progress', '',
-                importance: Importance.defaultImportance,
-                enableVibration: false,
-                showWhen: false,
-                ongoing: true,
-                autoCancel: false,
-            )),
-        );
+    Future<void> pauseTask() async {
+        await _plugin.cancel(0);
     }
 
     Future<void> endTask(String name) async {
         await _plugin.cancel(0);
         await _plugin.show(
-            1, '${name}', 'Finished!',
+            1, name, 'Finished!',
             NotificationDetails(android: AndroidNotificationDetails(
                 'daily_task_finished', 'Daily Task Finished', '',
                 importance: Importance.max,

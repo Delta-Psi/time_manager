@@ -6,6 +6,8 @@ import 'notifications.dart';
 import 'daily_task_editor.dart';
 import 'daily_tasks.dart';
 
+import 'dart:async';
+
 void main() {
     runApp(MyApp());
 }
@@ -19,17 +21,19 @@ class MyApp extends StatelessWidget {
     Widget build(BuildContext context) {
         return MaterialApp(
             title: 'Time Manager',
+            theme: ThemeData(
+                primaryColor: Color(0xFF457285),
+            ),
             home: DefaultTabController(
-                length: 3,
+                length: 2,
                 child: Scaffold(
                     appBar: AppBar(
-                        backgroundColor: Color(0xFF457285),
                         title: Text('Time Manager'),
                         bottom: TabBar(
                             tabs: [
                                 Tab(icon: Icon(Icons.edit)),
                                 Tab(icon: Icon(Icons.access_time)),
-                                Tab(icon: Icon(Icons.article)),
+                                //Tab(icon: Icon(Icons.article)),
                             ],
                         ),
                         actions: [
@@ -51,11 +55,23 @@ class MyApp extends StatelessWidget {
                                         _dbResetNotifier.value += 1;
                                     } else if (v == 2) {
                                         var notif = await NotificationHelper.instance();
-                                        await notif.startTask('foo', Duration(hours: 1));
-                                        await Future.delayed(Duration(seconds: 5));
-                                        await notif.updateTask('foo', Duration(minutes: 30));
-                                        await Future.delayed(Duration(seconds: 5));
-                                        await notif.endTask('foo');
+
+                                        final duration = Duration(minutes: 1);
+                                        await notif.showTask('foo', duration);
+                                        var startTime = DateTime.now();
+                                        Timer.periodic(
+                                            Duration(seconds: 1),
+                                            (timer) async {
+                                                var elapsed = DateTime.now().difference(startTime);
+                                                var remaining = duration - elapsed;
+                                                if (remaining.isNegative) {
+                                                    timer.cancel();
+                                                    await notif.endTask('foo');
+                                                } else {
+                                                    await notif.showTask('foo', remaining);
+                                                }
+                                            },
+                                        );
                                     }
                                 },
                             ),
@@ -71,11 +87,14 @@ class MyApp extends StatelessWidget {
                                     builder: (context, value, child) => DailyTaskEditor(),
                                 ),
                             ),
-                            ValueListenableBuilder<int>(
-                                valueListenable: _dbResetNotifier,
-                                builder: (context, value, child) => DailyTasks(),
+                            Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: ValueListenableBuilder<int>(
+                                    valueListenable: _dbResetNotifier,
+                                    builder: (context, value, child) => DailyTasks(),
+                                ),
                             ),
-                            Text('yeah'),
+                            //Text('yeah'),
                         ],
                     ),
                 ),

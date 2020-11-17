@@ -8,13 +8,18 @@ class DailyTask {
     String name;
     bool active;
 
-    DailyTask({this.id, this.name, this.active});
+    Duration remainingTime;
+    DateTime lastUpdated;
+
+    DailyTask({this.id, this.name, this.active, this.remainingTime, this.lastUpdated});
 
     static fromMap(map) {
         return DailyTask(
             id: map['rowid'],
             name: map['name'],
             active: map['active'] == 1,
+            remainingTime: map['remainingTime']==null?null:Duration(microseconds: map['remainingTime']),
+            lastUpdated: map['lastUpdated']==null?null:DateTime.fromMicrosecondsSinceEpoch(map['lastUpdated']),
         );
     }
 }
@@ -38,7 +43,7 @@ class DatabaseHelper {
             onCreate: (db, version) {
                 print('creating database');
                 return db.execute(
-                    "CREATE TABLE DailyTasks(name TEXT, active INTEGER DEFAULT 1)",
+                    "CREATE TABLE DailyTasks(name TEXT NOT NULL, active INTEGER DEFAULT 1 NOT NULL, remainingTime INTEGER, lastUpdated INTEGER)",
                 );
             },
             version: 2,
@@ -71,7 +76,7 @@ class DatabaseHelper {
 
         final List<Map<String, dynamic>> maps = await db.query(
             'DailyTasks',
-            columns: ['rowid', 'name', 'active'],
+            columns: ['rowid', 'name', 'active', 'remainingTime', 'lastUpdated'],
         );
 
         return List.generate(maps.length, (i) {
@@ -83,23 +88,36 @@ class DatabaseHelper {
 
         final List<Map<String, dynamic>> maps = await db.query(
             'DailyTasks',
-            columns: ['rowid', 'name', 'active'],
+            columns: ['rowid', 'name', 'active', 'remainingTime', 'lastUpdated'],
             where: 'active = 1',
         );
-
+        //print(maps);
 
         return List.generate(maps.length, (i) {
             return DailyTask.fromMap(maps[i]);
         });
     }
 
-
-    Future<void> setDailyTaskActive(id, bool active) async {
+    Future<void> setDailyTaskActive(int id, bool active) async {
         final db = await _getDb();
 
         await db.update(
             'DailyTasks',
-            {'active': active},
+            {'active': active?1:0},
+            where: 'rowid = ?',
+            whereArgs: [id],
+        );
+    }
+
+    Future<void> setDailyTaskRemainingTime(int id, Duration remainingTime) async {
+        final db = await _getDb();
+
+        await db.update(
+            'DailyTasks',
+            {
+                'remainingTime': remainingTime.inMicroseconds,
+                'lastUpdated': DateTime.now().microsecondsSinceEpoch,
+            },
             where: 'rowid = ?',
             whereArgs: [id],
         );
@@ -111,4 +129,3 @@ class DatabaseHelper {
         db.delete('DailyTasks', where: 'rowid = ?', whereArgs: [id]);
     }
 }
-

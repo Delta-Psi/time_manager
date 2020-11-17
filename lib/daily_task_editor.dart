@@ -90,7 +90,7 @@ class _DailyTaskEditorState extends State<DailyTaskEditor> {
                                                             },
                                                             value: task.active,
                                                         ),
-                                                        Expanded(child: Text('${task.name}')),
+                                                        Expanded(child: Text(task.name)),
                                                         IconButton(
                                                             onPressed: () {
                                                                 _removeDailyTask(task.id);
