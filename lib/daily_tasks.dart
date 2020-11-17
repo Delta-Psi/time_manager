@@ -6,7 +6,7 @@ import 'dart:async';
 import 'database.dart';
 import 'notifications.dart';
 
-const DAILY_TASK_DURATION = Duration(minutes: 1);
+const DAILY_TASK_DURATION = Duration(hours: 1);
 const RESET_HOUR = 6;
 
 class DailyTasks extends StatefulWidget {
