@@ -16,7 +16,7 @@ For help getting started with Flutter, view our
 samples, guidance on mobile development, and a full API reference.
 
 ## TODO
-[ ] Restructure the app in general; split the build step into different methods.
-[ ] Make sure the app doesn't suspend while it's counting down.
-[ ] Present/update the notification by minute instead of by second maybe?
-[ ] Prevent the clock icon completely vanishing in the release apk.
+- [ ] Restructure the app in general; split the build step into different methods.
+- [ ] Make sure the app doesn't suspend while it's counting down.
+- [ ] Present/update the notification by minute instead of by second maybe?
+- [ ] Prevent the clock icon completely vanishing in the release apk.
